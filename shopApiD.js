@@ -172,12 +172,12 @@ app.get("/totalPurchase/shop/:id", function(req, res) {
     let id = +req.params.id;
   
     let sql = `
-      SELECT products.*, IFNULL(SUM(purchases.quantity), 0) AS totalPurchase
-      FROM products
-      LEFT JOIN purchases ON products.productid = purchases.productid
-      WHERE purchases.shopid = $1
-      GROUP BY products.productid
-    `;
+    SELECT products.*, COALESCE(SUM(purchases.quantity), 0) AS totalPurchase
+    FROM products
+    LEFT JOIN purchases ON products.productid = purchases.productid
+    WHERE purchases.shopid = $1
+    GROUP BY products.productid
+  `;
   
     client.query(sql, [id], (err, result) => {
       if (err) {
@@ -192,12 +192,12 @@ app.get("/totalPurchase/shop/:id", function(req, res) {
     let id = +req.params.id;
   
     let sql = `
-      SELECT purchases.shopid, shops.name, shops.rent, SUM(purchases.quantity) AS totalPurchase
-      FROM purchases
-      INNER JOIN shops ON purchases.shopid = shops.shopid
-      WHERE purchases.productid = $1
-      GROUP BY purchases.shopid
-    `;
+    SELECT purchases.shopid, shops.name, shops.rent, SUM(purchases.quantity) AS totalPurchase
+    FROM purchases
+    INNER JOIN shops ON purchases.shopid = shops.shopid
+    WHERE purchases.productid = $1
+    GROUP BY purchases.shopid, shops.name, shops.rent
+  `;
   
     client.query(sql, [id], (err, result) => {
       if (err) {
